@@ -9,7 +9,7 @@ import (
 )
 
 func handleConnection(conn net.Conn) {
-	buff := make([]byte, 1)
+	buff := make([]byte, 1024)
 	_, err := conn.Read(buff)
 	if err != nil {
 		fmt.Println("failed:", err)
@@ -35,13 +35,10 @@ func main() {
 	}
 	// for {
 	conn, err := l.Accept()
-	// connections = append(connections, conn)
-	go handleConnection(conn)
-	// fmt.Printf("didn't get uo: %v %v", err, connections)
-	// conn.Write("hello")
+	handleConnection(conn)
 	if err != nil {
 		fmt.Println("Error accepting connection: ", err.Error())
-		// os.Exit(1)
+		os.Exit(1)
 	}
 	// }
 }
