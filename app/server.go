@@ -16,7 +16,7 @@ func handleConnection(conn net.Conn) {
 		return
 	}
 	fmt.Println("Got: ", string(buff))
-	conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\rn"))
+	conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
 	// fmt.Printf("dat is %v", data)
 	conn.Close()
 }
