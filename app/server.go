@@ -18,14 +18,16 @@ func handleConnection(conn net.Conn) {
 		return
 	}
 	data := string(buff)
-	x := strings.Split(data, " ")[1]
-	fmt.Printf("x is: %v\n", x)
-	if x == "/" {
-		conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
-	} else {
-		fmt.Println("in else block")
-		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
-	}
+	x := strings.Split(strings.Split(data, " ")[1], "/")
+	fmt.Printf("x is: %v", x)
+	response := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n%v", x[len(x)-1])
+	conn.Write([]byte(response))
+	// if x[len(x)-1] == "/" {
+	// 	conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+	// } else {
+	// 	fmt.Println("in else block")
+	// 	conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+	// }
 	// fmt.Printf("dat is %v", data)
 	conn.Close()
 }
