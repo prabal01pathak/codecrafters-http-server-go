@@ -19,9 +19,13 @@ func handleConnection(conn net.Conn) {
 	}
 	data := string(buff)
 	x := strings.Split(strings.Split(data, " ")[1], "/")
-	fmt.Printf("x is: %v", x)
-	response := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n%v", x[len(x)-1])
-	conn.Write([]byte(response))
+	fmt.Printf("x is: %v", x[0])
+	if len(x) == 0 || x[0] == "echo" {
+		response := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n%v", x[len(x)-1])
+		conn.Write([]byte(response))
+	} else {
+		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+	}
 	// if x[len(x)-1] == "/" {
 	// 	conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
 	// } else {
