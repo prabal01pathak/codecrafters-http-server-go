@@ -23,15 +23,14 @@ func handleConnection(conn net.Conn) {
 	x := strings.Split(data, " ")[1]
 	fmt.Printf("x is: %v", len(x))
 	s := strings.Split(x, "/")
+	resp := s[len(s)-1]
 	found := false
+	response := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n%v", len(resp), resp)
 	if x == "/" {
-		response := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n%v", s[len(s)-1])
 		conn.Write([]byte(response))
 		found = true
 	}
-	for i, match := range re.FindAllString(x, -1) {
-		fmt.Println(match, "found at index", i)
-		response := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n%v", s[len(s)-1])
+	for range re.FindAllString(x, -1) {
 		conn.Write([]byte(response))
 		found = true
 		break
