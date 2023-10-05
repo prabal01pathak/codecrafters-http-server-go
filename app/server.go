@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	// "log"
 	// Uncomment this block to pass the first stage
 	"net"
@@ -11,12 +12,20 @@ import (
 func handleConnection(conn net.Conn) {
 	buff := make([]byte, 1024)
 	_, err := conn.Read(buff)
+	// fmt.Printf("data is: %v", d)
 	if err != nil {
 		fmt.Println("failed:", err)
 		return
 	}
-	fmt.Println("Got: ", string(buff))
-	conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+	data := string(buff)
+	x := strings.Split(data, " ")[1]
+	fmt.Printf("x is: %v\n", x)
+	if x == "/" {
+		conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+	} else {
+		fmt.Println("in else block")
+		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+	}
 	// fmt.Printf("dat is %v", data)
 	conn.Close()
 }
