@@ -22,8 +22,8 @@ func handleConnection(conn net.Conn) {
 	data := string(buff)
 	x := strings.Split(data, " ")[1]
 	fmt.Printf("x is: %v", len(x))
-	s := strings.Split(x, "/")
-	resp := s[len(s)-1]
+	s := x[1:]                                 // strings.Split(x, "/")
+	resp := strings.Replace(s, "echo/", "", 1) // s[len(s)-1]
 	found := false
 	response := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n%v", len(resp), resp)
 	if x == "/" {
