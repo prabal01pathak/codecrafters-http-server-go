@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	// "log"
 	// Uncomment this block to pass the first stage
@@ -10,6 +11,7 @@ import (
 )
 
 func handleConnection(conn net.Conn) {
+	re := regexp.MustCompile(`(?m)\/echo\/.*`)
 	buff := make([]byte, 1024)
 	_, err := conn.Read(buff)
 	// fmt.Printf("data is: %v", d)
@@ -18,14 +20,30 @@ func handleConnection(conn net.Conn) {
 		return
 	}
 	data := string(buff)
-	x := strings.Split(strings.Split(data, " ")[1], "/")
-	fmt.Printf("x is: %v", x[0])
-	if len(x) == 0 || x[0] == "echo" {
-		response := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n%v", x[len(x)-1])
+	x := strings.Split(data, " ")[1]
+	fmt.Printf("x is: %v", len(x))
+	s := strings.Split(x, "/")
+	found := false
+	if x == "/" {
+		response := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n%v", s[len(s)-1])
 		conn.Write([]byte(response))
-	} else {
+		found = true
+	}
+	for i, match := range re.FindAllString(x, -1) {
+		fmt.Println(match, "found at index", i)
+		response := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n%v", s[len(s)-1])
+		conn.Write([]byte(response))
+		found = true
+		break
+	}
+	if !found {
 		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 	}
+	// if len(x) == 0 || x[1] == "echo" {
+	// 	response := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n%v", x[len(x)-1])
+	// 	conn.Write([]byte(response))
+	// } else {
+	// }
 	// if x[len(x)-1] == "/" {
 	// 	conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
 	// } else {
