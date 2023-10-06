@@ -1,12 +1,23 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"os"
 	"regexp"
 	"strings"
 )
+
+func getHeader(data string) (string, error) {
+	fmt.Printf("data is: %v", data)
+	regex := regexp.MustCompile(`User-Agent:\s*(.*)`)
+	headMatch := regex.FindStringSubmatch(data)
+	if len(headMatch) > 0 {
+		return headMatch[len(headMatch)-1], nil
+	}
+	return "", errors.New("no value matches")
+}
 
 func handleConnection(conn net.Conn) {
 	buff := make([]byte, 1024)
@@ -16,25 +27,29 @@ func handleConnection(conn net.Conn) {
 		return
 	}
 	data := string(buff)
+	header, _ := getHeader(data)
+	fmt.Println(header)
 	x := strings.Split(data, " ")[1]
-	fmt.Printf("x is: %v", len(x))
-	regex := regexp.MustCompile(`/echo/([^/]+.*)$`)
-	match := regex.FindStringSubmatch(x)
-	fmt.Printf("matches are: %v", match)
-
-	if x == "/" {
-		response := fmt.Sprintf(
-			"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n%v",
+	endpointRegex := regexp.MustCompile(`/echo/([^/]+.*)$`)
+	match := endpointRegex.FindStringSubmatch(x)
+	response := "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n%v"
+	switch {
+	case x == "/":
+		s := fmt.Sprintf(
+			response,
 			0, "",
 		)
-		conn.Write([]byte(response))
-	} else if len(match) > 1 {
-		response := fmt.Sprintf(
-			"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n%v",
+		conn.Write([]byte(s))
+	case x == "/user-agent":
+		s := fmt.Sprintf(response, len(header), header)
+		conn.Write([]byte(s))
+	case strings.HasPrefix(x, "/echo"):
+		s := fmt.Sprintf(
+			response,
 			len(match[len(match)-1]), match[len(match)-1],
 		)
-		conn.Write([]byte(response))
-	} else {
+		conn.Write([]byte(s))
+	default:
 		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 	}
 	conn.Close()
