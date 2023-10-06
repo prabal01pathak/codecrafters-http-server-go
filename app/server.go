@@ -65,11 +65,16 @@ func main() {
 		os.Exit(1)
 	}
 	// for {
-	conn, err := l.Accept()
-	handleConnection(conn)
-	if err != nil {
-		fmt.Println("--- Error accepting connection: ", err.Error())
-		os.Exit(1)
+	count := 1
+	for {
+		conn, err := l.Accept()
+		count++
+		go handleConnection(conn)
+		if err != nil {
+			fmt.Println("--- Error accepting connection: ", err.Error())
+			os.Exit(1)
+		}
+		fmt.Printf("count is: %v", count)
 	}
 	// }
 }
