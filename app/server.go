@@ -2,19 +2,15 @@ package main
 
 import (
 	"fmt"
-	"regexp"
-	"strings"
-	// "log"
-	// Uncomment this block to pass the first stage
 	"net"
 	"os"
+	"regexp"
+	"strings"
 )
 
 func handleConnection(conn net.Conn) {
-	re := regexp.MustCompile(`(?m)\/echo\/.*`)
 	buff := make([]byte, 1024)
 	_, err := conn.Read(buff)
-	// fmt.Printf("data is: %v", d)
 	if err != nil {
 		fmt.Println("failed:", err)
 		return
@@ -22,44 +18,30 @@ func handleConnection(conn net.Conn) {
 	data := string(buff)
 	x := strings.Split(data, " ")[1]
 	fmt.Printf("x is: %v", len(x))
-	s := x[1:]                                 // strings.Split(x, "/")
-	resp := strings.Replace(s, "echo/", "", 1) // s[len(s)-1]
-	found := false
-	response := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n%v", len(resp), resp)
+	regex := regexp.MustCompile(`/echo/([^/]+.*)$`)
+	match := regex.FindStringSubmatch(x)
+	fmt.Printf("matches are: %v", match)
+
 	if x == "/" {
+		response := fmt.Sprintf(
+			"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n%v",
+			0, "",
+		)
 		conn.Write([]byte(response))
-		found = true
-	}
-	for range re.FindAllString(x, -1) {
+	} else if len(match) > 1 {
+		response := fmt.Sprintf(
+			"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n%v",
+			len(match[len(match)-1]), match[len(match)-1],
+		)
 		conn.Write([]byte(response))
-		found = true
-		break
-	}
-	if !found {
+	} else {
 		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 	}
-	// if len(x) == 0 || x[1] == "echo" {
-	// 	response := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n%v", x[len(x)-1])
-	// 	conn.Write([]byte(response))
-	// } else {
-	// }
-	// if x[len(x)-1] == "/" {
-	// 	conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
-	// } else {
-	// 	fmt.Println("in else block")
-	// 	conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
-	// }
-	// fmt.Printf("dat is %v", data)
 	conn.Close()
 }
 
 func main() {
-	// connections := make([]net.Conn, 0)
-	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
-
-	// Uncomment this block to pass the first stage
-	//
 	l, err := net.Listen("tcp", "0.0.0.0:4221")
 	if err != nil {
 		fmt.Println("Failed to bind to port 4221")
