@@ -66,7 +66,7 @@ func main() {
 	conn, err := l.Accept()
 	handleConnection(conn)
 	if err != nil {
-		fmt.Println("Error accepting connection: ", err.Error())
+		fmt.Println("--- Error accepting connection: ", err.Error())
 		os.Exit(1)
 	}
 	// }
