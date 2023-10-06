@@ -14,7 +14,9 @@ func getHeader(data string) (string, error) {
 	regex := regexp.MustCompile(`User-Agent:\s*(.*)`)
 	headMatch := regex.FindStringSubmatch(data)
 	if len(headMatch) > 0 {
-		return headMatch[len(headMatch)-1], nil
+		s := headMatch[len(headMatch)-1]
+		s = strings.TrimSpace(s)
+		return s, nil
 	}
 	return "", errors.New("no value matches")
 }
