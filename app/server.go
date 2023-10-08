@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"net"
 	"os"
@@ -21,7 +22,7 @@ func getHeader(data string) (string, error) {
 	return "", errors.New("no value matches")
 }
 
-func handleConnection(conn net.Conn) {
+func handleConnection(conn net.Conn, dir string) {
 	buff := make([]byte, 1024)
 	_, err := conn.Read(buff)
 	if err != nil {
@@ -35,6 +36,7 @@ func handleConnection(conn net.Conn) {
 	endpointRegex := regexp.MustCompile(`/echo/([^/]+.*)$`)
 	match := endpointRegex.FindStringSubmatch(x)
 	response := "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %v\r\n\r\n%v"
+	notFoundRes := "HTTP/1.1 404 Not Found\r\n\r\n"
 	switch {
 	case x == "/":
 		s := fmt.Sprintf(
@@ -51,30 +53,46 @@ func handleConnection(conn net.Conn) {
 			len(match[len(match)-1]), match[len(match)-1],
 		)
 		conn.Write([]byte(s))
+	case strings.HasPrefix(x, "/files"):
+		fileNameRegx := regexp.MustCompile(`^/files/(.*)$`)
+		match := fileNameRegx.FindStringSubmatch(x)
+		fmt.Printf("matches are: %v\n", match)
+		fileName := fmt.Sprintf("%s/%s", dir, match[len(match)-1])
+		data, err := os.ReadFile(fileName)
+		if err != nil {
+			conn.Write([]byte(notFoundRes))
+		} else {
+			fmt.Printf("data is %s and err  is %s", data, err)
+			response := "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %v\r\n\r\n%v"
+			s := fmt.Sprintf(response, len(data), string(data))
+			conn.Write([]byte(s))
+		}
 	default:
-		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+		conn.Write([]byte(notFoundRes))
 	}
 	conn.Close()
 }
 
 func main() {
 	fmt.Println("Logs from your program will appear here!")
+	dir := ""
+	flag.StringVar(&dir, "directory", "", "Directory")
+	flag.Parse()
+	fmt.Printf("direcotry is: %v\n", dir)
 	l, err := net.Listen("tcp", "0.0.0.0:4221")
 	if err != nil {
 		fmt.Println("Failed to bind to port 4221")
 		os.Exit(1)
 	}
-	// for {
 	count := 1
 	for {
 		conn, err := l.Accept()
-		count++
-		go handleConnection(conn)
+		go handleConnection(conn, dir)
 		if err != nil {
 			fmt.Println("--- Error accepting connection: ", err.Error())
 			os.Exit(1)
 		}
+		count++
 		fmt.Printf("count is: %v", count)
 	}
-	// }
 }
