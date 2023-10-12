@@ -125,10 +125,10 @@ func handleConnection(conn net.Conn, dir string) {
 				conn.Write([]byte(notFoundRes))
 			} else {
 				fn := getFileName(x)
-				err = os.WriteFile(fn, file, 0644)
+				os.WriteFile(fn, file, 0644)
 				fmt.Printf("file name is: %s\n", fn)
 				// fmt.Printf("file si: %v", file)
-				response := "HTTP/1.1 201 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %v\r\n\r\n%v"
+				response := "HTTP/1.1 201 OK"
 				conn.Write([]byte(response))
 			}
 
