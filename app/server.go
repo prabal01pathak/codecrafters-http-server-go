@@ -125,7 +125,8 @@ func handleConnection(conn net.Conn, dir string) {
 				conn.Write([]byte(notFoundRes))
 			} else {
 				fn := getFileName(x)
-				os.WriteFile(fn, file, 0644)
+				fileName := fmt.Sprintf("%s/%s", dir, fn)
+				os.WriteFile(fileName, file, 0644)
 				fmt.Printf("file name is: %s\n", fn)
 				// fmt.Printf("file si: %v", file)
 				response := "HTTP/1.1 201 OK"
