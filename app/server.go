@@ -115,11 +115,11 @@ func handleConnection(conn net.Conn, dir string) {
 		switch {
 		case strings.HasPrefix(x, "/files"):
 			fmt.Printf("files endpoint is called")
-			contentLength, er := headerValues["Content-Length"]
-			cl, _ := strconv.Atoi(contentLength)
-			if er {
-				fmt.Printf("ERRor while reading the contentLength: %v\n%v\n\nnnnoooo", er, headerValues)
+			contentLength, exists := headerValues["Content-Length"]
+			if !exists {
+				fmt.Printf("ERRor while reading the contentLength: %v\n%v\n\nnnnoooo\ncl: \n\n", exists, headerValues)
 			}
+			cl, _ := strconv.Atoi(contentLength)
 			file, err := readRequestBody(reader, cl)
 			if err != nil {
 				conn.Write([]byte(notFoundRes))
