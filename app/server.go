@@ -118,7 +118,7 @@ func handleConnection(conn net.Conn, dir string) {
 			contentLength, er := headerValues["Content-Length"]
 			cl, _ := strconv.Atoi(contentLength)
 			if er {
-				fmt.Printf("ERRor while reading the contentLength: %v", er)
+				fmt.Printf("ERRor while reading the contentLength: %v\n%v\n\nnnnoooo", er, headerValues)
 			}
 			file, err := readRequestBody(reader, cl)
 			if err != nil {
