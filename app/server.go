@@ -126,6 +126,7 @@ func handleConnection(conn net.Conn, dir string) {
 			} else {
 				fn := getFileName(x)
 				fileName := fmt.Sprintf("%s/%s", dir, fn)
+				fileName = strings.ReplaceAll(fileName, "//", "/")
 				fmt.Printf("\nfilename is: %s", fileName)
 				os.WriteFile(fileName, file, 0644)
 				fmt.Printf("file name is: %s\n", fn)
