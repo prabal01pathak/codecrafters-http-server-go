@@ -127,14 +127,11 @@ func handleConnection(conn net.Conn, dir string) {
 				fn := getFileName(x)
 				fileName := fmt.Sprintf("%s/%s", dir, fn)
 				fileName = strings.ReplaceAll(fileName, "//", "/")
-				fmt.Printf("\nfilename is: %s", fileName)
-				fmt.Printf("\nfiles are: %s\n", file)
 				os.WriteFile(fileName, file, 7777)
-				fmt.Printf("file name is: %s\n", fn)
 				// fmt.Printf("file si: %v", file)
-				response := "HTTP/1.1 201 OK"
+				response := "HTTP/1.1 201 Created\r\nContent-Type: text/plain\r\n\r\n"
 				conn.Write([]byte(response))
-				fmt.Print("written the connection response: ")
+				// fmt.Print("written the connection response: ")
 			}
 
 		default:
